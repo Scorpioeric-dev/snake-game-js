@@ -11,45 +11,129 @@ ground.src = "img/ground.png";
 const foodImg = new Image();
 foodImg.src = "img/food.png";
 
+// Load auto files
+let dead = new Audio();
+let eat = new Audio();
+let up = new Audio();
+let right = new Audio();
+let left = new Audio();
+let down = new Audio();
+
+dead.src = "audio/dead.mp3";
+eat.src = "audio/eat.mp3";
+up.src = "audio/up.mp3";
+right.src = "audio/right.mp3";
+left.src = "audio/left.mp3";
+down.src = "audio/down.mp3";
+
 //create Snake
-const snake = [];
+let snake = [];
+
 snake[0] = {
   x: 9 * box,
   y: 10 * box,
 };
 
 //create Food
-const food = {
+let food = {
   x: Math.floor(Math.random() * 17 + 1) * box,
-  y: Math.floor(Math.random() * 15 + 3) * box,
+  y: Math.floor(Math.random() * 15 + 3) * box
 };
 
 //create Score
-const score = 0;
+let score = 0;
+
+// controlling the snake
+let d;
+document.addEventListener("Keydown", direction);
+
+function direction(event) {
+  let key = event.keyCode;
+  if (key === 37 && d != "Right") {
+    d = "Left";
+    left.play()
+  } else if (key == 38 && d != "Down") {
+    d = "Up";
+    up.play()
+  } else if (key == 39 && d != "Left") {
+    d = "Right";
+    right.play()
+  } else if (key == 40 && d != "Up") {
+    d = "Down";
+    down.play();
+  }
+}
+
+// Check collission
+
+function collision(head, array) {
+  for (let i = 0; i < array.length; i++) {
+    if (head.x == array[i].x && head.y == array[i].y) {
+      return true;
+    }
+  }
+  return false;
+}
 
 //Draw Function
-const draw = () => {
+function draw() {
   ctx.drawImage(ground, 0, 0);
+
   for (let i = 0; i < snake.length; i++) {
-    ctx.fillStyle = i == 0 ? "green" : "white";
+    ctx.fillStyle = (i == 0) ? "green" : "white";
     ctx.fillRect(snake[i].x, snake[i].y, box, box);
 
     ctx.strokeStyle = "red";
     ctx.strokeRect(snake[i].x, snake[i].y, box, box);
   }
   ctx.drawImage(foodImg, food.x, food.y);
+  //Old Head position
 
   let snakeX = snake[0].x;
-  let snakeY = snake[o].y;
+  let snakeY = snake[0].y;
 
-  snake.pop()
-  //Direction of snake controls
-  if()
+  // direction
+  if (d == "Left") snakeX -= box;
+  if (d == "Up") snakeY -= box;
+  if (d == "Right") snakeX += box;
+  if (d == "Down") snakeY += box;
+  //Remove tail
+  if (snakeX == food.x && snakeY == food.y) {
+    score++;
+    eat.play();
+    food = {
+      x: Math.floor(Math.random() * 17 + 1) * box,
+      y: Math.floor(Math.random() * 15 + 3) * box,
+    };
+    // we don't remove the tail
+  } else {
+    // remove the tail
+    snake.pop();
+  }
+
+  // add new head
+  let newHead = {
+    x: snakeX,
+    y: snakeY,
+  };
+
+  // game over
+  if (
+    snakeX < box ||
+    snakeX > 17 * box ||
+    snakeY < 3 * box ||
+    snakeY > 17 * box ||
+    collision(newHead, snake)
+  ) {
+    clearInterval(game);
+    dead.play();
+  }
+  snake.unshift(newHead);
 
   ctx.fillStyle = "white";
   ctx.font = "45px Pixel";
   ctx.fillText(score, 2 * box, 1.6 * box);
-};
+}
 
 //call draw every 100 ms
-const game = setInterval(draw, 100);
+let game = setInterval(draw, 100);
