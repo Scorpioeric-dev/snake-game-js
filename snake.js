@@ -45,9 +45,10 @@ let score = 0;
 
 // controlling the snake
 let d;
-document.addEventListener("Keydown", direction);
+document.addEventListener("keydown", direction);
 
 function direction(event) {
+  console.log('hit')
   let key = event.keyCode;
   if (key === 37 && d != "Right") {
     d = "Left";
